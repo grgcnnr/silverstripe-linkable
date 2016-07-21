@@ -14,11 +14,16 @@ class EmbeddedObjectField extends FormField
         'update'
     );
 
+    protected $objectTypes = array('video', 'link', 'rich', 'photo');
+
     protected $editableEmbedCode = false;
 
     protected $object;
 
     protected $message;
+
+
+    protected $requiredType = false;
 
     public function setValue($value)
     {
@@ -33,6 +38,22 @@ class EmbeddedObjectField extends FormField
     {
         $this->editableEmbedCode = $v;
         return $this;
+    }
+
+    public function setRequiredType($type)
+    {
+      if (in_array($type, $this->objectTypes)) {
+        $this->requiredType = strtolower($type);
+      }else{
+        user_error('"' . $type . '" is not a valied oEmbed type');
+      }
+
+      return $this;
+    }
+
+    public function getRequiredType()
+    {
+      return $this->requiredType;
     }
 
     public function getMessage()
@@ -122,7 +143,13 @@ class EmbeddedObjectField extends FormField
                 $object = EmbeddedObject::create();
                 $object->setFromEmbed($info);
 
+                // Check if a required type is set and if it matches up swith the type property on the oembed object
+                if (($type = $this->getRequiredType()) && $type !== strtolower($object->Type)) {
+                  $this->message = _t('EmbeddedObjectField.TYPEERROR', 'The provided URL is of type: <strong>' . $object->Type . '</strong>. We were expecting an object of type:<strong>' . $type .'</strong>.');
+                  return $this->FieldHolder();
+                }
                 $this->object = $object;
+
                 // needed to make sure the check in FieldHolder works out
                 $object->ID = -1;
                 return $this->FieldHolder();

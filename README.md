@@ -148,3 +148,12 @@ $Video.ThumbURL
 ```
 
 See EmbeddedObject.php for a list of properties saved available in $db.
+
+## Restricting the type of object
+
+You can restrict the field to a single type of oEmbed object eg `video`, `link`, `rich`, `photo` by calling `setRequiredType()` on the EmbeddedObjectField.
+
+```
+$fields->addFieldToTab('Root.Header', EmbeddedObjectField::create('Video', 'Video from oEmbed URL', $this->Video())->setRequiredType('video'));
+
+```
